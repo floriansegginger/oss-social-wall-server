@@ -1,0 +1,47 @@
+doctype 5
+html
+  head
+    title= `${location.name} | Pimp My Wall`
+    meta(name="viewport", content="width=device-width, initial-scale=1.0, user-scalable=no")
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/fonts/social-wall/css/social-wall.css')
+    link(rel='stylesheet', href='/fonts/social-wall/css/animation.css')
+    link(rel='stylesheet', href='/css/main.css')
+    block other-stylesheets
+  body
+    .navbar.navbar-fixed-top.navbar-default
+      .container-fluid
+        .navbar-header
+          button.navbar-toggle(type='button',data-toggle='collapse',data-target='.navbar-collapse')
+            span.sr-only Navigation
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          .navbar-brand
+            img#logo(src="/img/logo.png")
+        .navbar-collapse.collapse
+          ul.nav.navbar-nav
+            li(class=(location.category === 'events')?'active':'')
+              a(href='/')
+                span.glyphicon.glyphicon-calendar
+                |  Mes événements
+            if (user.hasRight('edit', {type: 'users'}) || user.hasRight('create', {type: 'users'}))
+              li(class=(location.category === 'users')?'active':'')
+                a(href='/users')
+                  i.icon-users
+                  |  Utilisateurs
+          ul.nav.navbar-nav.navbar-right
+            li(class=(location.category === 'profile')?'active':'')
+              a(href=`/user/${user._id}`)
+                span.glyphicon.glyphicon-user
+                |  Profil
+            li
+              a(href='/logout')
+                span.glyphicon.glyphicon-off
+                |  Déconnexion
+    .container
+      block content
+    script(src='/jquery/jquery.min.js')
+    script(src='/bootstrap/js/bootstrap.min.js')
+    script(src='/js/main.js')
+    block other-scripts

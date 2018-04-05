@@ -1,0 +1,330 @@
+extends layout
+
+block content
+  - isCreating = (typeof req.params.id === 'undefined')
+  if (isCreating && !editEvent.name )
+    - editEvent = {sources: {}, displayParameters: {colors: {text:'#000000', border: '#000000', content: '#ffffff', titleBackground:'#ffffff', titleText:'#000000', background:'#999999'}, fontSize: 1, spacing: 15, borderSize: 5, font:'Open Sans'}}
+  a.btn.btn-xl.btn-lg.btn-default.btn-moderate(href=`/moderate/${editEvent._id}`, title='Modération')
+    i.glyphicon.glyphicon-th-list
+  h1= (isCreating)?`Nouvel événement`:`Modification de '${editEvent.name}'`
+  if (errors && errors.length !== 0)
+    .alert.alert-danger(role='alert')
+      ul
+        each error in errors
+          li= error
+  if (success)
+    .alert.alert-success(role='alert')
+      .row
+        .col-sm-9
+          p L'événement a été mis à jour avec succès
+        .col-sm-3
+          a.btn.btn-lg.btn-success.btn-block(href=`/`) Retour
+  form#event-form(method='post', enctype='multipart/form-data')
+    .row
+      .form-group.col-sm-6
+        label(for='name') Nom:
+        input.form-control(type='text', value=editEvent.name, name='name')
+        p.help-block Ce nom vous permet de retrouver cet événement parmis les autres. Il sera également affiché sur les écrans, dans les iFrame et dans la webapp.
+      .form-group.col-sm-6
+        label(for='name') Description:
+        textarea.form-control(name='description')
+          = editEvent.description
+        p.help-block Cette description apparaitra en-dessous du titre de l'événement sur le wall. Vous pouvez y mettre l'URL courte de la webapp par exemple.
+    .row
+      .form-group.col-sm-6
+        label(for='dateStart') Date de début:
+        .input-group.date(data-control-type='datetime-picker')
+          input.form-control(type='text', name='dateStart', value=!isCreating?moment(editEvent.dateStart).format('L LT'):'')
+          span.input-group-addon
+            i.glyphicon.glyphicon-calendar
+        //- input.form-control(type='datetime', value=editEvent.dateStart, disabled)
+        p.help-block Tout contenu créé avant cette date sera ignoré.
+      .form-group.col-sm-6
+        label(for='dateStart') Date de fin:
+        .input-group.date(data-control-type='datetime-picker')
+          input.form-control(type='text', name='dateEnd', value=!isCreating?moment(editEvent.dateEnd).format('L LT'):'')
+          span.input-group-addon
+            i.glyphicon.glyphicon-calendar
+        p.help-block Tout contenu créé après cette date sera ignoré.
+    .row
+      .form-group.col-sm-6
+        label(for='location') Emplacement:
+        textarea.form-control(name='location')= editEvent.location
+        p.help-block Où se situe cet événement? <em>Pas encore utilisé</em>.
+      .form-group.col-sm-6
+        label(for='url') URL:
+        input.form-control(type='url', value=editEvent.url, name='url')
+        p.help-block Lien vers une page pour cet événement. <em>Pas encore utilisé</em>
+    .row
+      h3.col-sm-12 Sources
+    .row
+      .form-group.col-sm-6
+        label(for='sources-list') Liste des sources:
+        textarea.form-control(name='sourcesAsText')
+          if (req.body.sourcesAsText)
+            = req.body.sourcesAsText
+          else
+            each source,index in editEvent.sources
+              if (index !== 0)
+                = `\n`
+              = `${source.type}:`
+              = contentFactory.filterToText(source.type, source.parameters)
+              if (source.text)
+                = ` ${source.text}`
+
+        p.help-block <em>L'ajout ou la suppression d'un hashtag Twitter peut prendre jusqu'à 20 secondes</em>
+        p.help-block <em>Le contenu en provenance d'Instagram peut prendre jusqu'à 1 minute avant d'apparaître</em>
+        p.help-block Sources supportées:
+        ul.help-block
+          li <strong>twitter</strong>:<em>#hashtag</em> <em><strong>Texte à afficher</strong></em>
+          li <strong>facebook</strong>:<em>url-de-la-page</em> <em><strong>Texte à afficher</strong></em>
+          li <strong>instagram</strong>:<em>#hashtag</em> <em><strong>Texte à afficher</strong></em>
+      .col-sm-6
+        label &nbsp;
+        p.help-block Veuillez entrer une liste de sources dans le format<br><em>type:valeur texte-de-remplacement</em><br> séparés de retours à la ligne.
+        p.help-block Vous pouvez, pour chaque source, écrire un texte qui sera affiché à la place de l'url de la page ou du hasthag. Ceci vous permet de créer par exemple une url courte qui ouvrira la page Facebook de l'événement.
+        p.help-block <strong>Exemples:</strong>
+        p.help-block twitter:#pimpmywall<br>facebook:https://www.facebook.com/pimpmywallch/ http://bit.ly/pmw<br>instagram:#pimpmywall
+        p.help-block Pour utiliser la source Instagram, vous devez donner les accès à notre application:
+        p.help-block
+          - var callbackUrl = `http://${config.host}:${config.port}/instagram-get-token?event=${editEvent._id}`
+          a.btn.btn-sm.btn-default(a href=`https://api.instagram.com/oauth/authorize/?client_id=${config.instagram.client_id}&redirect_uri=${encodeURI(callbackUrl)}&response_type=code&scope=public_content`)
+            i.icon-instagram
+            | Autoriser
+    .row
+      h3.col-sm-12 Apparence graphique
+    .row
+      .form-group.col-md-3.col-md-offset-1.col-sm-4.col-sm-offset-1
+        label(for='logo') Logo:
+        .logo-display.thumbnail
+          img(src=editEvent.displayParameters.logo)
+        input.form-control(type='file', name='logo')
+        p.help-block Un logo pour cet événement qui sera affiché sur le wall à côté du titre.
+      .form-group.col-md-3.col-md-offset-3.col-sm-4.col-sm-offset-2
+        label(for='logo') Image de fond:
+        .background-display.thumbnail
+          img(src=editEvent.displayParameters.backgroundImage)
+        input.form-control(type='file', name='backgroundImage')
+        p.help-block Une image qui sera affichée en fond du wall.
+    .row
+      h4.col-sm-12 Couleurs
+    .row
+      .col-sm-6
+        .row
+          .form-group.col-sm-6
+            label(for='displayParameters.colors.text') Textes:
+            .input-group.colorpicker-component(data-control-type='color-picker', data-control-update-selector='#preview .box', data-control-update-property='color')
+              input.form-control(type='text', name='displayParameters.colors.text', value=editEvent.displayParameters.colors.text)
+              span.input-group-addon
+                i
+            p.help-block Couleur de tous les textes sur la page
+          .form-group.col-sm-6
+            label(for='displayParameters.colors.background') Fond:
+            .input-group.colorpicker-component(data-control-type='color-picker', data-control-update-selector='#preview', data-control-update-property='background-color')
+              input.form-control(type='text', name='displayParameters.colors.background', value=editEvent.displayParameters.colors.background)
+              span.input-group-addon
+                i
+            p.help-block Couleur du fond (seulement visible si pas d'image de fond)
+        .row
+          .form-group.col-sm-6
+            label(for='displayParameters.colors.border') Bordure:
+            .input-group.colorpicker-component(data-control-type='color-picker', data-control-update-selector='#preview .box p, #preview .title p', data-control-update-property='border-color')
+              input.form-control(type='text', name='displayParameters.colors.border', value=editEvent.displayParameters.colors.border)
+              span.input-group-addon
+                i
+            p.help-block Les contenus peuvent avoir une bordure colorée
+          .form-group.col-sm-6
+            label(for='displayParameters.colors.content') Contenu:
+            .input-group.colorpicker-component(data-control-type='color-picker', data-control-update-selector='#preview .box p', data-control-update-property='background-color')
+              input.form-control(type='text', name='displayParameters.colors.content', value=editEvent.displayParameters.colors.content)
+              span.input-group-addon
+                i
+            p.help-block Couleur de fond des rectangles de contenu.
+        .row
+          .form-group.col-sm-6
+            label(for='displayParameters.colors.border') Fond du titre:
+            .input-group.colorpicker-component(data-control-type='color-picker', data-control-update-selector='#preview .title p', data-control-update-property='background-color')
+              input.form-control(type='text', name='displayParameters.colors.titleBackground', value=editEvent.displayParameters.colors.titleBackground)
+              span.input-group-addon
+                i
+            p.help-block Les contenus peuvent avoir une bordure colorée
+          .form-group.col-sm-6
+            label(for='displayParameters.colors.content') Texte du titre:
+            .input-group.colorpicker-component(data-control-type='color-picker', data-control-update-selector='#preview .title p', data-control-update-property='color')
+              input.form-control(type='text', name='displayParameters.colors.titleText', value=editEvent.displayParameters.colors.titleText)
+              span.input-group-addon
+                i
+            p.help-block Couleur de fond des rectangles de contenu.
+        .row
+          h4.col-sm-12 Tailles et espacements
+        .row
+          h4.col-sm-12 Textes
+        .row
+          .col-sm-12
+            label(for='displayParameters.font') Police:
+        .row
+          .col-sm-12
+            .btn-group.font-selector(data-control-type='font-picker')
+              a.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
+                span.font-box Didact Gothic
+                span.caret
+              input(type='hidden',
+                data-control-update-selector='#preview', 
+                data-control-update-property='font-family',
+                data-control-update-calc=`"'" + val + "', sans-serif"`,
+                name='displayParameters.font',
+                value=editEvent.displayParameters.font)
+              ul.dropdown-menu.fonts-list(role="menu")
+                li(role="presentation") 
+                  a(role=menuitem) AvantGuarde
+                li(role="presentation")
+                  a Didact Gothic
+                li(role="presentation")
+                  a Something else
+            p.help-block Toutes les polices diponibles sur Google Fonts
+        .row
+          .col-sm-12
+            label(for='displayParameters.fontSize') Taille des textes:
+        .row
+          .col-sm-12.slider-container
+            i.slider-icon.icon-small-font
+            input(
+              type='text', 
+              name='displayParameters.fontSize',
+              data-provide='slider', 
+              data-slider-ticks='[1,2,3]',
+              data-slider-ticks-labels='["petit", "moyen", "grand"]',
+              data-slider-min='1',
+              data-slider-max='3',
+              data-slider-step='0.5',
+              data-slider-tooltip='hide',
+              data-slider-selection='none',
+              data-slider-value=editEvent.displayParameters.fontSize, 
+              data-control-update-selector='#preview .box p', 
+              data-control-update-property='font-size',
+              data-control-update-calc='val + "em"')
+            i.slider-icon.icon-big-font
+        .row
+          .col-sm-12
+            p.help-block Si vous faites tourner le wall sur un petit écran, vous pouvez agrandir la taille des polices
+        .row 
+          .col-sm-12
+            label(for='displayParameters.fontSize') Espacement:
+        .row
+          .col-sm-12.slider-container
+            i.slider-icon.icon-spacing-none
+            input(
+              type='text', 
+              name='displayParameters.spacing',
+              data-provide='slider', 
+              data-slider-ticks='[0,5,10,15,20,25,30]',
+              data-slider-ticks-labels='["0", "","", "15", "", "", "30"]',
+              data-slider-min='1',
+              data-slider-max='30',
+              data-slider-step='1',
+              data-slider-tooltip='hide',
+              data-slider-selection='none',
+              data-slider-value=editEvent.displayParameters.spacing, 
+              data-control-update-selector='#preview .box p, #preview .title p', 
+              data-control-update-property='margin',
+              data-control-update-calc='(val/2) + "px"')
+            i.slider-icon.icon-spacing-max
+        .row
+          .col-sm-12
+            p.help-block De combien de pixels sont espacés les rectangles de contenu.
+        .row 
+          .col-sm-12
+            label(for='displayParameters.borderSize') Taille des bordures:
+        .row
+          .col-sm-12.slider-container
+            i.slider-icon.icon-border-none
+            input(
+              type='text', 
+              name='displayParameters.borderSize',
+              data-provide='slider', 
+              data-slider-ticks='[0,5,10,15,20]',
+              data-slider-ticks-labels='["0", "", "10", "", "20"]',
+              data-slider-min='1',
+              data-slider-max='20',
+              data-slider-step='1',
+              data-slider-tooltip='hide',
+              data-slider-selection='none',
+              data-slider-value=editEvent.displayParameters.borderSize, 
+              data-control-update-selector='#preview p, #preview .title p', 
+              data-control-update-property='border-width',
+              data-control-update-calc='val + "px"')
+            i.slider-icon.icon-border-max
+        .row 
+          .col-sm-12
+            label(for='displayParameters.borderSize') Nombre de colonnes:
+        .row
+          .col-sm-12.slider-container
+            i.slider-icon.icon-columns-1
+            input(
+              type='text', 
+              name='displayParameters.columns',
+              data-provide='slider', 
+              data-slider-ticks='[1,2,3,4,5,6]',
+              data-slider-ticks-labels='["1", "2", "3", "4", "5", "6"]',
+              data-slider-min='1',
+              data-slider-max='6',
+              data-slider-step='1',
+              data-slider-tooltip='hide',
+              data-slider-selection='none',
+              data-slider-value=editEvent.displayParameters.columns)
+            i.slider-icon.icon-columns-6
+        .row
+          .col-sm-12
+            p.help-block Epaisseur des bordures
+      .col-sm-6
+        label Aperçu:
+        #preview
+          .title
+            p Titre de l'événement
+          .box
+            p Abc
+          .box
+            p Abc
+          .box
+            p Abc
+          .box
+            p Abc
+    .row
+      h4.col-sm-12 Autres paramètres
+    .row
+      .form-group.col-sm-6
+        label(for='displayParameters.showWallOnWebappPost')
+          input(type='checkbox', checked=editEvent.displayParameters.showWallOnWebappPost, name='displayParameters.showWallOnWebappPost')
+          | &nbsp;&nbsp; Afficher le wall après avoir mis un message à travers la webapp
+        p.help-block Si cette option est activée, l'utilisateur venant de mettre un message à travers la webapp verra le wall sur son téléphone.
+      .form-group.col-sm-6
+        label(for='displayParameters.askCompany')
+          input(type='checkbox', checked=editEvent.displayParameters.askCompany, name='displayParameters.askCompany')
+          | &nbsp;&nbsp; Demander l'entreprise dans la webapp
+        p.help-block Si cette option est activée, un champ optionnel "Entreprise" est affiché dans la webapp
+      .form-group.col-sm-6
+        label(for='displayParameters.simpleDisplay')
+          input(type='checkbox', checked=editEvent.displayParameters.simpleDisplay, name='displayParameters.simpleDisplay')
+          | &nbsp;&nbsp; Affichage simplifié du contenu
+        p.help-block Si cette option est activée, l'heure et la date de chaque contenu n'est plus affichée, ainsi que la source et l'avatar
+    .row
+      .form-group.col-sm-6.actions
+        input(type='hidden',name='submit',value='Submit')
+        input.btn.btn-lg.btn-success#submit-button(type='submit', value='Enregistrer')
+        a.btn.btn-lg.btn-default(href='/') Annuler
+
+block other-scripts
+  script(type='text/javascript', src='/moment/moment-with-locales.min.js')
+  script(type='text/javascript', src='/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js')
+  script(type='text/javascript', src='/bootstrap-slider/bootstrap-slider.min.js')
+  script(type='text/javascript', src='/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js')
+  script(type='text/javascript', src='/js/pmw-font-selector.js')
+  script(type='text/javascript', src='/js/event.js')
+  script(src='/bootstrap-switch/js/bootstrap-switch.min.js')
+
+block other-stylesheets
+  link(rel='stylesheet', href='/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css')
+  link(rel='stylesheet', href='/bootstrap-slider/css/bootstrap-slider.min.css')
+  link(rel='stylesheet', href='/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css')
+  link(rel='stylesheet', href='/css/event.css')
+  link(rel='stylesheet', href='/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css')

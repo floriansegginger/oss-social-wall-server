@@ -1,0 +1,13 @@
+doctype 5
+html
+  head
+    title= `${location.name} | Pimp My Wall`
+    meta(name="viewport", content="width=device-width, initial-scale=1.0, user-scalable=no")
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/css/main.css')
+  body
+    .container
+      block content
+    script(src='/jquery/jquery.min.js')
+    script(src='/bootstrap/js/bootstrap.min.js')
+      block other-scripts

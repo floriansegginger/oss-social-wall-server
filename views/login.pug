@@ -1,0 +1,19 @@
+extends layout-loggedout
+
+block content
+  .row
+    .col-sm-6.col-sm-offset-3.login-block
+      h1.text-center
+        img(src="/img/logo.png")
+      form.form-horizontal(role="form",id="login", method="POST", action="/login")
+        .form-group
+          label.control-label.col-sm-4(for='name') Nom d'utilisateur
+          .col-sm-8
+            input#username.form-control(type='text', name='name',placeholder="Nom d'utilisateur")
+        .form-group
+          label.control-label.col-sm-4(for='password') Mot de passe
+          .col-sm-8
+            input#password.form-control(type='password', name='password',placeholder="Mot de passe")
+        .form-group
+          .col-sm-8.col-sm-offset-4
+            button.btn.btn-default(type="submit") Connexion

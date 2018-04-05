@@ -1,0 +1,85 @@
+extends layout
+
+block content
+  - isCreating = (typeof req.params.id === 'undefined')
+  - isSelf = editUser._id && editUser._id.toString() == user._id.toString()
+  if (isSelf)
+    h1 Modification de mon profil
+  else
+    h1= (isCreating)?`Nouvel utilisateur`:`Modification de '${editUser.name}'`
+  if (errors && errors.length !== 0)
+    .alert.alert-danger(role='alert')
+      ul
+        each error in errors
+          li= error
+  if (success)
+    .alert.alert-success(role='alert')
+      .row
+        .col-sm-9
+          p Modifications effectuées avec succès
+        .col-sm-3
+          if (isSelf)
+            a.btn.btn-lg.btn-success.btn-block(href=(isSelf)?`/`:'/users') Retour
+  form#user-form(method='post')
+    .row
+      .form-group.col-sm-6
+        label(for='name') Nom d'utilisateur:
+        input.form-control(type='text', value=editUser.name, name='name')
+        p.help-block Le nom qui doit être utilisé pour se connecter.
+      .form-group.col-sm-6
+        label(for='email') E-Mail:
+        input.form-control(type='email', value=editUser.email, name='email')
+        p.help-block Les communications importantes seront envoyées sur cette adresse.
+    .row
+      .form-group.col-sm-6
+        if (editUser._id && editUser._id.toString() == user._id.toString())
+          label(for='currentPassword') Mot de passe actuel
+          input.form-control(type='password', name='currentPassword')
+          p.help-block Si vous voulez définir un nouveau mot de passe, saisissez votre mot de passe actuel ci-dessus
+        label(for='newPassword') Nouveau mot de passe:
+        input.form-control(type='password', name='newPassword',value=req.body.newPassword)
+        p.help-block Longueur minimale 5 caractères
+        label(for='confirmPassword') Confirmer le nouveau mot de passe:
+        input.form-control(type='password', name='confirmPassword',value=req.body.confirmPassword)
+    if (!isCreating && editUser.hasRight('edit', {type:'billing'}))
+      .row
+        h3.col-sm-12 Informations de facturation
+      .row
+        .form-group.col-sm-6
+          label Société:
+          input.form-control(type='text', name='company', value=editUser.company)
+          label Adresse de facturation:
+          textarea.form-control(name='billingAddress')
+            = editUser.billingAddress
+          p.help-block Les différentes factures seront envoyées à cette adresse.
+        .form-group.col-sm-6
+          label N° TVA:
+          input.form-control(type='text', name='vatNumber', value=editUser.vatNumber)
+    if (!isSelf && user.hasRight('edit', {type:'user-events', user:editUser._id}))
+      .row
+        h3.col-sm-12 Droits
+      .row
+        .col-sm-12
+          p.help-block Choisissez les événements que cet utilisateur aura le droit de modérer
+          dl.dl-horizontal.events-list
+            each event in user.events
+              dt
+                input(type='checkbox', 
+                  name='events[]', 
+                  value=event._id,
+                  checked=((editUser.events && editUser.events.indexOf(event._id))>=0)?'checked':undefined)
+              dd
+                strong= event.name
+                p.event-details= `Du ${moment(event.dateStart).locale('fr-ch').format('L à LT')} au ${moment(event.dateEnd).locale('fr-ch').format('L à LT')}`
+    .row
+      .form-group.col-sm-6.actions
+        input.btn.btn-lg.btn-success#submit-button(type='submit', value='Enregistrer',name='submit')
+        a.btn.btn-lg.btn-default(href=(isSelf)?`/`:'/users') Annuler
+
+block other-scripts
+  script(src='/bootstrap-switch/js/bootstrap-switch.min.js')
+  script(type='text/javascript', src='/js/user.js')
+
+block other-stylesheets
+  link(rel='stylesheet', href='/css/user.css')
+  link(rel='stylesheet', href='/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css')

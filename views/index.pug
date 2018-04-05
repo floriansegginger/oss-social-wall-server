@@ -1,0 +1,68 @@
+extends layout
+
+block content
+  if (user.hasRight('create', {type: 'event'}))
+    .top-actions
+      a.btn.btn-lg.btn-primary(href='/event')
+        i.glyphicon.glyphicon-plus
+        |  Créer un événement
+  if (events.length === 0)
+    h3 Vous n'avez pas d'événements.
+    p Ccontactez l'opérateur pour qu'il vous donne des droits de modération sur un événement.
+  each event in events
+    .panel.panel-default.event
+      .panel-heading
+        h4= event.name
+        if (user.hasRight('edit', {type: 'event', event:event._id}))
+          a.btn.btn-lg.btn-danger.action-button(
+            href=`/event/${event._id}?delete=1`, 
+            title='Supprimer', 
+            data-confirm=`Voulez-vous vraiment supprimer l'événement '${event.name}'?`)
+            i.glyphicon.glyphicon-trash
+          a.btn.btn-lg.btn-default.action-button(href=`/event/${event._id}`,title='Modifier')
+            i.glyphicon.glyphicon-cog
+        if (user.hasRight('moderate', {type: 'event', event:event._id}))
+          a.btn.btn-lg.btn-default.action-button(href=`/moderate/${event._id}`,title='Modérer')
+            i.glyphicon.glyphicon-th-list
+      .panel-body
+        p= `Du ${moment(event.dateStart).locale('fr-ch').format('L à LT')} au ${moment(event.dateEnd).locale('fr-ch').format('L à LT')}`
+        h4 Sources:
+        ul.list-unstyled.sources
+          each source in event.sources
+            li(class=source.type)
+              if (source.text)
+                = `${contentFactory.filterToText(source.type, source.parameters)}`
+                = ` (${source.text})`
+              else
+                = contentFactory.filterToText(source.type, source.parameters)
+      ul.list-group
+        li.list-group-item
+          .row
+            strong.col-sm-12 URL pour wall plein-écran (copier-coller dans un navigateur)
+          .row
+            .col-xs-11
+              pre= event.getWallUrl()
+            .col-xs-1
+              a.btn.btn-lg.btn-default.btn-block.btn-open-link(href=event.getWallUrl(), target='_blank')
+                i.glyphicon.glyphicon-share-alt
+        li.list-group-item
+          .row
+            strong.col-sm-12 Code iFrame
+          .row
+            .col-xs-11
+              pre= `<iframe src="${event.getIFrameUrl()}"></iframe>`
+            .col-xs-1
+              a.btn.btn-lg.btn-default.btn-block.btn-open-link(href=event.getIFrameUrl(), target='_blank')
+                i.glyphicon.glyphicon-share-alt
+        li.list-group-item
+          .row
+            strong.col-sm-12 URL pour webapp
+          .row
+            .col-xs-11
+              pre= event.getWebappUrl()
+            .col-xs-1
+              a.btn.btn-lg.btn-default.btn-block.btn-open-link(href=event.getWebappUrl(), target='_blank')
+                i.glyphicon.glyphicon-share-alt
+
+block other-stylesheets
+  link(rel='stylesheet', href='/css/index.css')

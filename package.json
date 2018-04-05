@@ -1,0 +1,47 @@
+{
+  "name": "social-wall-server",
+  "version": "1.0.0",
+  "description": "The Fullrange Interactive Social Wall server",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/floriansegginger/social-wall-server"
+  },
+  "author": "Fullrange Interactive Sàrl",
+  "bugs": {
+    "url": "https://github.com/floriansegginger/social-wall-server/issues"
+  },
+  "homepage": "https://github.com/floriansegginger/social-wall-server",
+  "dependencies": {
+    "big-integer": "^1.6.16",
+    "body-parser": "^1.15.2",
+    "bootstrap": "^3.3.7",
+    "bootstrap-colorpicker": "^2.3.5",
+    "bootstrap-slider": "^9.2.0",
+    "bootstrap-switch": "^3.3.2",
+    "ent": "^2.2.0",
+    "eonasdan-bootstrap-datetimepicker": "^4.17.42",
+    "express": "^4.14.0",
+    "express-session": "^1.14.1",
+    "fbgraph": "^1.3.0",
+    "gm": "^1.23.0",
+    "image-type": "^2.1.0",
+    "instagram-node": "^0.5.8",
+    "jquery": "^3.1.0",
+    "moment": "^2.15.1",
+    "mongoose": "^4.6.0",
+    "multer": "^1.2.0",
+    "passport": "^0.3.2",
+    "passport-local": "^1.0.0",
+    "password-hash": "^1.2.2",
+    "pug": "^2.0.0-beta6",
+    "request": "^2.76.0",
+    "session-file-store": "^0.2.1",
+    "stylus": "^0.54.5",
+    "twitter": "^1.4.0",
+    "ws": "^1.1.1"
+  }
+}

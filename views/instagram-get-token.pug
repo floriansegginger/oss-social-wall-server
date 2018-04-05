@@ -1,0 +1,7 @@
+extends layout
+
+block content
+  h1 Ok!
+  p= `Nous avons bien obtenu votre autorisation pour l'événement '${event.name}'`
+  p
+    a.btn.btn-lg.btn-default(href=`/event/${event.id}`) Retour à l'événement

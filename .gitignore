@@ -1,0 +1,11 @@
+node_modules
+/database
+/sessions
+/public/css/*.css
+/config.js
+/public/uploads/*
+/public/exports/*
+/tmp-uploads/*
+/public/css/events/*.styl
+/public/css/events/*.css
+/bower_components

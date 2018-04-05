@@ -1,0 +1,39 @@
+extends layout
+
+block content
+  .top-actions
+    a.btn.btn-lg.btn-primary(href='/user')
+      i.glyphicon.glyphicon-plus
+      |  Créer un utilisateur
+  if (users.length === 0)
+    h3 Vous n'avez pas d'utilisateurs.
+    p Vous pouvez créer des utilisateurs et gérer leurs comptes ici. Ils pourront modérer le contenu mais pas modifier les paramètres de l'événement.
+  each user in users
+    .panel.panel-default.user
+      .panel-heading
+        h4
+          = user.name
+        if (user.hasRight('edit', {type: 'user', user:user._id}))
+          a.btn.btn-lg.btn-danger.action-button(
+            href=`/user/${user._id}?delete=1`, 
+            title='Supprimer', 
+            data-confirm=`Voulez-vous vraiment supprimer l'utilisateur '${user.name}'?`)
+            i.glyphicon.glyphicon-trash
+          a.btn.btn-lg.btn-default.action-button(href=`/user/${user._id}`,title='Modifier')
+            i.glyphicon.glyphicon-cog
+      .panel-body
+        dl.dl-horizontal
+          dt Nom d'utilisateur:
+          dd= user.name
+          dt E-Mail:
+          dd= user.email
+          dt Créé le:
+          dd= moment(user.creationDate).locale('fr-ch').format('L à LT')
+          dt Événements:
+          dd
+            ul.list-unstyled.events
+              each event in user.events
+                li= event.name
+
+block other-stylesheets
+  link(rel='stylesheet', href='/css/users.css')

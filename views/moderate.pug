@@ -1,0 +1,90 @@
+extends layout
+
+block content
+  if (user.hasRight('edit', {type: 'event', event:event._id}))
+    a.btn.btn-xl.btn-lg.btn-default.btn-event-settings(href=`/event/${event._id}`, title='Modification')
+      i.glyphicon.glyphicon-cog
+  .moderate-new-content
+    label
+      | Modérer? 
+      input(
+        type='checkbox',
+        data-size='large',
+        data-control-type='switch',
+        data-on-text='OUI',
+        data-off-text='NON',
+        checked=(event.moderateNewContent)?'checked':undefined,
+        name='moderate-new-content')
+  h1= `Modération pour '${event.name}'`
+
+  #event-contents-pagination
+    .btn-group.btn-filters
+      a.btn.btn-xs(data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')
+        | Filtres 
+        i.glyphicon.glyphicon-chevron-down
+      ul.dropdown-menu.filters.pull-right
+        li.checkbox
+          label
+            input(type='checkbox', 
+              data-filter-type='boolean-attribute',
+              data-filter='pinned')
+            | Epinglé
+        li.checkbox
+          label
+            input(type='checkbox', 
+              data-filter-type='boolean-attribute',
+              data-filter='selected')
+            | Selectionné
+        li.checkbox 
+          label
+            input(type='checkbox',
+              data-filter-type='boolean-attribute', 
+              data-filter='valid')
+            | Validé
+        li.checkbox
+          label
+            input(type='checkbox',
+              data-filter-type='boolean-attribute-inverted',
+              data-filter='valid')
+            | Non validé
+        li.divider(role='separator')
+        li.checkbox
+          label
+            input(type='checkbox',
+              data-filter-type='source-type',
+              data-filter='twitter')
+            | Twitter
+        li.checkbox
+          label
+            input(type='checkbox',
+              data-filter-type='source-type',
+              data-filter='webapp')
+            | Webapp
+        li.checkbox
+          label
+            input(type='checkbox',
+              data-filter-type='source-type',
+              data-filter='facebook')
+            | Facebook
+        li.checkbox
+          label
+            input(type='checkbox',
+              data-filter-type='source-type',
+              data-filter='instagram')
+            | Instagram
+
+  #event-contents
+
+  #loading
+    i.icon-spin.animate-spin
+    |  Chargement...
+
+block other-stylesheets
+  link(rel='stylesheet', href='/lib/pagination/pagination.min.css')
+  link(rel='stylesheet', href='/bootstrap-switch/css/bootstrap3/bootstrap-switch.min.css')
+  link(rel='stylesheet', href='/css/moderate.css')
+
+block other-scripts
+  script(src='/lib/pagination/pagination.min.js')
+  script(src='/bootstrap-switch/js/bootstrap-switch.min.js')
+  script(src='/js/moderate.js')
